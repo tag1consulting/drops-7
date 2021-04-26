@@ -317,7 +317,7 @@ define('MENU_PREFERRED_LINK', '1cf698d64d1aa4b83907cf6ed55db3a7f8e92c91');
  * actually exists. This list of 'masks' is built in menu_rebuild().
  *
  * @param $parts
- *   An array of path parts; for the above example, 
+ *   An array of path parts; for the above example.
  *   array('node', '12345', 'edit').
  *
  * @return
@@ -576,7 +576,8 @@ function _menu_load_objects(&$item, &$map) {
           // 'load arguments' in the hook_menu() entry, but they need
           // some processing. In this case the $function is the key to the
           // load_function array, and the value is the list of arguments.
-          list($function, $args) = each($function);
+          $args = current($function);
+          $function = key($function);
           $load_functions[$index] = $function;
 
           // Some arguments are placeholders for dynamic items to process.
@@ -1066,7 +1067,7 @@ function menu_tree_output($tree) {
     // the active class accordingly. But local tasks do not appear in menu
     // trees, so if the current path is a local task, and this link is its
     // tab root, then we have to set the class manually.
-    if ($data['link']['href'] == $router_item['tab_root_href'] && $data['link']['href'] != $_GET['q']) {
+    if ($router_item && $data['link']['href'] == $router_item['tab_root_href'] && $data['link']['href'] != $_GET['q']) {
       $data['link']['localized_options']['attributes']['class'][] = 'active';
     }
 
@@ -2402,7 +2403,8 @@ function menu_set_active_trail($new_trail = NULL) {
       // a stripped down menu tree containing the active trail only, in case
       // the given menu has not been built in this request yet.
       $tree = menu_tree_page_data($preferred_link['menu_name'], NULL, TRUE);
-      list($key, $curr) = each($tree);
+      $curr = current($tree);
+      next($tree);
     }
     // There is no link for the current path.
     else {
@@ -2432,7 +2434,8 @@ function menu_set_active_trail($new_trail = NULL) {
         }
         $tree = $curr['below'] ? $curr['below'] : array();
       }
-      list($key, $curr) = each($tree);
+      $curr = current($tree);
+      next($tree);
     }
     // Make sure the current page is in the trail to build the page title, by
     // appending either the preferred link or the menu router item for the
@@ -2480,6 +2483,9 @@ function menu_link_get_preferred($path = NULL, $selected_menu = NULL) {
     // untranslated paths). Afterwards, the most relevant path is picked from
     // the menus, ordered by menu preference.
     $item = menu_get_item($path);
+    if ($item === FALSE) {
+      return FALSE;
+    }
     $path_candidates = array();
     // 1. The current item href.
     $path_candidates[$item['href']] = $item['href'];
@@ -2589,7 +2595,7 @@ function menu_get_active_breadcrumb() {
 
     // Don't show a link to the current page in the breadcrumb trail.
     $end = end($active_trail);
-    if ($item['href'] == $end['href']) {
+    if (is_array($end) && $item['href'] == $end['href']) {
       array_pop($active_trail);
     }
 

@@ -48,11 +48,8 @@ function drupal_error_levels() {
  *   The filename that the error was raised in.
  * @param $line
  *   The line number the error was raised at.
- * @param $context
- *   An array that points to the active symbol table at the point the error
- *   occurred.
  */
-function _drupal_error_handler_real($error_level, $message, $filename, $line, $context) {
+function _drupal_error_handler_real($error_level, $message, $filename, $line) {
   if ($error_level & error_reporting()) {
     $types = drupal_error_levels();
     list($severity_msg, $severity_level) = $types[$error_level];
@@ -66,7 +63,7 @@ function _drupal_error_handler_real($error_level, $message, $filename, $line, $c
     _drupal_log_error(array(
       '%type' => isset($types[$error_level]) ? $severity_msg : 'Unknown error',
       // The standard PHP error handler considers that the error messages
-      // are HTML. We mimick this behavior here.
+      // are HTML. We mimic this behavior here.
       '!message' => filter_xss_admin($message),
       '%function' => $caller['function'],
       '%file' => $caller['file'],
@@ -114,7 +111,7 @@ function _drupal_decode_exception($exception) {
   return array(
     '%type' => get_class($exception),
     // The standard PHP exception handler considers that the exception message
-    // is plain-text. We mimick this behavior here.
+    // is plain-text. We mimic this behavior here.
     '!message' => check_plain($message),
     '%function' => $caller['function'],
     '%file' => $caller['file'],
@@ -233,7 +230,7 @@ function _drupal_log_error($error, $fatal = FALSE) {
   }
   else {
     // Display the message if the current error reporting level allows this type
-    // of message to be displayed, and unconditionnaly in update.php.
+    // of message to be displayed, and unconditionally in update.php.
     if (error_displayable($error)) {
       $class = 'error';
 
